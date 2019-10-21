@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Welcome to My Search Engine</title>
+</head>
+
+<body>
+  <div id="container">  
+      <div class="start_descrition">
+        <img src="img/logo.png" style ="width:90%; padding-left: 100px;">
+        <h1><span></span></h1>
+        <span>Search for the latest news</span>
+        <div class="search_promo">
+          <div class="input-group">
+            <input id = "search_box" type="text" class="form-control" aria-label="...">
+              <div class="input-group-btn btn_promo_search">
+              <button type="button" class="btn btn-success" id ="search_button">Search</button>
+            </div>
+          </div>
+    <div> 
+      <h3 style = "display:none;" id = "statistics"> </h3>
+      <table style="display: none;" id="results"></table>
+    </div>
+        </div>
+      </div>
+    </div>
+   
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/main.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+  $( "#search_button" ).click(function() {
+
+    var table = document.getElementById("results");
+    table.style.display = 'none';
+    table.innerHTML = "";
+    var stats = document.getElementById("statistics");
+    stats.style.display = 'none';
+    stats.innerHTML = "";
+    //$("#results tr").remove(); 
+    //$("#results th").remove(); 
+    console.log($("#search_box").val());
+    input = $("#search_box").val();
+    var t0 = performance.now();
+    $.ajax({
+      type: "POST",
+      dataType:"json",
+      url: "search.php",
+      data: {input},
+      success: function(data){
+        data = JSON.stringify(data);
+        data = JSON.parse(data);
+        console.log("Length = ",data.length);
+        if(data.length > 0)
+        {
+          var table = document.getElementById("results");
+          if (table.style.display === 'none') {
+                    table.style.display = 'block';
+                }
+          var tr = document.createElement("tr"); 
+          th = document.createElement("th");
+          th.appendChild(document.createTextNode("Document"));
+          tr.appendChild(th);
+          th = document.createElement("th");
+          th.appendChild(document.createTextNode("Link"));
+          tr.appendChild(th);
+          th = document.createElement("th");
+          th.appendChild(document.createTextNode("Score"));
+          tr.appendChild(th);
+          table.appendChild(tr);
+          for(var i = 0;i<data.length;i++)
+          {  
+            var tr = document.createElement("tr");               
+            var id = data[i].id;
+            var url = data[i].url;
+            var title = data[i].title;
+            var score = data[i].score;
+            console.log("Id = ",id);
+            console.log("url = ",url);
+            console.log("Title = ",title);
+            console.log("Score = ",score);          
+            var td = document.createElement("td");
+            //var id_txt = document.createTextNode("id");
+            td.appendChild(document.createTextNode(id));
+            tr.appendChild(td);
+            var link = document.createElement("a");
+            link.setAttribute("href",url);
+            var text_link = document.createTextNode(title);
+            link.appendChild(text_link);
+            //td = document.createElement("td");
+            //td.appendChild(document.createTextNode(url));
+            /*tr.appendChild(td);
+            td = document.createElement("td");
+            td.appendChild(document.createTextNode(title));*/
+            td = document.createElement("td");
+            td.appendChild(link);
+            tr.appendChild(td);
+            td = document.createElement("td");
+            td.appendChild(document.createTextNode(score));
+            tr.appendChild(td);
+            table.appendChild(tr);
+
+          }      
+        } 
+        var t1 = performance.now();
+        console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
+        var num = (t1-t0) / 1000;
+        var n = num.toFixed(3);
+        statistics = "About " + data.length + " results. (" + n + " seconds)";
+        stats.style.display = 'block';
+        stats.innerHTML = statistics;
+      }
+    });   
+  });
+</script>
+</body>
+</html>
